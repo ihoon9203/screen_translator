@@ -3,6 +3,7 @@ import atexit
 from PyQt6.QtWidgets import QApplication
 from capture_frame import MainFrame
 from control_widget import ControlWidget
+from ocr_worker import OCRWorker
 
 
 class ScreenTranslatorApp(QApplication):
@@ -18,6 +19,9 @@ class ScreenTranslatorApp(QApplication):
         # control_widget에서 main_frame에 접근할 수 있도록 참조 설정
         self.control_widget.main_frame = self.main_frame
         
+        # OCR Worker 초기화 (기본 언어로 초기화, 나중에 동적으로 변경)
+        self.ocr_worker = None
+        
         # 시그널 연결
         self.control_widget.capture_requested.connect(self.handle_capture_request)
         self.control_widget.toggle_interactive.connect(self.main_frame.set_interactive_state)
@@ -30,8 +34,10 @@ class ScreenTranslatorApp(QApplication):
         # 앱 종료 시 임시 파일 정리 등록
         atexit.register(self.cleanup_on_exit)
         
-    def handle_capture_request(self):
+    def handle_capture_request(self, language_list):
         """캡처 요청 처리"""
+        print(f"선택된 언어: {language_list}")
+        
         # 캡처 전에 컨트롤 위젯 숨기기
         self.control_widget.hide()
         
@@ -44,6 +50,42 @@ class ScreenTranslatorApp(QApplication):
         
         # 캡처 후에 컨트롤 위젯 다시 보이기
         self.control_widget.show()
+        
+        # 캡처된 이미지와 언어 리스트를 OCR 처리에 전달
+        if result and isinstance(result, dict) and result.get('success'):
+            print(f"OCR 처리 시작: 이미지={result['temp_file_path']}, 언어={language_list}")
+            self.process_ocr(result['temp_file_path'], language_list)
+    
+    def process_ocr(self, image_path, language_list):
+        """OCR 처리"""
+        try:
+            # 언어 리스트가 변경되었거나 OCR Worker가 없으면 새로 생성
+            if self.ocr_worker is None or self.ocr_worker.language_list != language_list:
+                print(f"OCR Worker 초기화 중... 언어: {language_list}")
+                self.ocr_worker = OCRWorker(language_list)
+            
+            # OCR 처리 실행
+            print("OCR 처리 중...")
+            result = self.ocr_worker.process_image(image_path)
+            
+            # 결과 출력
+            print("=== OCR 결과 ===")
+            for i, (bbox, text, confidence) in enumerate(result):
+                print(f"{i+1}. 텍스트: '{text}' (신뢰도: {confidence:.2f})")
+                print(f"   위치: {bbox}")
+                print()
+            
+            # 추출된 텍스트만 따로 출력
+            extracted_texts = [text for _, text, _ in result]
+            if extracted_texts:
+                print("=== 추출된 텍스트 ===")
+                for text in extracted_texts:
+                    print(text)
+            else:
+                print("텍스트를 찾을 수 없습니다.")
+                
+        except Exception as e:
+            print(f"OCR 처리 중 오류 발생: {e}")
     
     def handle_deactivate_request(self):
         """비활성화 요청 처리"""

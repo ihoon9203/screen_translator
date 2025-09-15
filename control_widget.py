@@ -2,7 +2,7 @@
 
 
 
-from PyQt6.QtWidgets import QMainWindow, QWidget, QVBoxLayout, QPushButton, QLabel, QApplication
+from PyQt6.QtWidgets import QMainWindow, QWidget, QVBoxLayout, QPushButton, QLabel, QApplication, QCheckBox, QGroupBox
 from PyQt6.QtCore import Qt, pyqtSignal
 
 
@@ -10,7 +10,7 @@ class ControlWidget(QMainWindow):
     """2번 화면: 컨트롤 위젯 (캡처 버튼)"""
     
     # 시그널 정의
-    capture_requested = pyqtSignal()
+    capture_requested = pyqtSignal(list)  # 언어 리스트를 함께 전달
     toggle_interactive = pyqtSignal(bool)
     
     def __init__(self):
@@ -18,8 +18,8 @@ class ControlWidget(QMainWindow):
         self.setWindowTitle("Control Widget")
         # 상단 바 제거하되 자유롭게 움직일 수 있도록 설정
         self.setWindowFlags(Qt.WindowType.FramelessWindowHint | Qt.WindowType.WindowStaysOnTopHint)
-        # 윈도우 크기 설정
-        self.setGeometry(600, 100, 200, 150)
+        # 윈도우 크기 설정 (언어 선택을 위해 높이 증가)
+        self.setGeometry(600, 100, 200, 250)
         
         # 중앙 위젯 설정
         central_widget = QWidget()
@@ -72,6 +72,81 @@ class ControlWidget(QMainWindow):
         self.status_label = QLabel("상태: 비활성화")
         layout.addWidget(self.status_label)
         
+        # 언어 선택 그룹
+        language_group = QGroupBox("언어 선택")
+        language_group.setStyleSheet("""
+            QGroupBox {
+                font-size: 12px;
+                font-weight: bold;
+                color: #333;
+                border: 1px solid #ccc;
+                border-radius: 5px;
+                margin-top: 10px;
+                padding-top: 10px;
+            }
+            QGroupBox::title {
+                subcontrol-origin: margin;
+                left: 10px;
+                padding: 0 5px 0 5px;
+            }
+        """)
+        language_layout = QVBoxLayout(language_group)
+        
+        # 언어 체크박스들
+        self.korean_checkbox = QCheckBox("한국어 (ko)")
+        self.korean_checkbox.setChecked(True)  # 기본값으로 한국어 선택
+        self.korean_checkbox.stateChanged.connect(self.on_language_changed)
+        
+        self.english_checkbox = QCheckBox("영어 (en)")
+        self.english_checkbox.setChecked(True)  # 기본값으로 영어 선택
+        self.english_checkbox.stateChanged.connect(self.on_language_changed)
+        
+        self.japanese_checkbox = QCheckBox("일본어 (ja)")
+        self.japanese_checkbox.stateChanged.connect(self.on_language_changed)
+        
+        self.chinese_checkbox = QCheckBox("중국어 (ch_sim)")
+        self.chinese_checkbox.stateChanged.connect(self.on_language_changed)
+        
+        self.spanish_checkbox = QCheckBox("스페인어 (es)")
+        self.spanish_checkbox.stateChanged.connect(self.on_language_changed)
+        
+        # 체크박스 스타일 설정
+        checkbox_style = """
+            QCheckBox {
+                font-size: 11px;
+                color: #333;
+                spacing: 5px;
+            }
+            QCheckBox::indicator {
+                width: 16px;
+                height: 16px;
+            }
+            QCheckBox::indicator:unchecked {
+                border: 1px solid #ccc;
+                background-color: white;
+                border-radius: 3px;
+            }
+            QCheckBox::indicator:checked {
+                border: 1px solid #4CAF50;
+                background-color: #4CAF50;
+                border-radius: 3px;
+            }
+        """
+        
+        self.korean_checkbox.setStyleSheet(checkbox_style)
+        self.english_checkbox.setStyleSheet(checkbox_style)
+        self.japanese_checkbox.setStyleSheet(checkbox_style)
+        self.chinese_checkbox.setStyleSheet(checkbox_style)
+        self.spanish_checkbox.setStyleSheet(checkbox_style)
+        
+        language_layout.addWidget(self.korean_checkbox)
+        language_layout.addWidget(self.english_checkbox)
+        language_layout.addWidget(self.japanese_checkbox)
+        language_layout.addWidget(self.chinese_checkbox)
+        language_layout.addWidget(self.spanish_checkbox)
+
+        layout.addWidget(language_group)
+        
         # 종료 버튼
         self.exit_button = QPushButton("종료")
         self.exit_button.setStyleSheet("""
@@ -96,10 +171,12 @@ class ControlWidget(QMainWindow):
         
         # 내부 상태
         self.interactive_enabled = False
+        self.selected_languages = ['ko', 'en']  # 기본 선택된 언어
         
     def on_capture_clicked(self):
         """캡처 버튼 클릭 처리"""
-        self.capture_requested.emit()
+        # 현재 선택된 언어 리스트와 함께 캡처 요청
+        self.capture_requested.emit(self.get_selected_languages())
         
     def on_toggle_clicked(self):
         """상호작용 토글 버튼 클릭 처리"""
@@ -114,6 +191,33 @@ class ControlWidget(QMainWindow):
             self.show()
             self.toggle_button.setText("상호작용 활성화")
             self.status_label.setText("상태: 비활성화")
+    
+    def on_language_changed(self):
+        """언어 선택 변경 처리"""
+        self.selected_languages = []
+        
+        if self.korean_checkbox.isChecked():
+            self.selected_languages.append('ko')
+        if self.english_checkbox.isChecked():
+            self.selected_languages.append('en')
+        if self.japanese_checkbox.isChecked():
+            self.selected_languages.append('ja')
+        if self.chinese_checkbox.isChecked():
+            self.selected_languages.append('ch_sim')
+        if self.spanish_checkbox.isChecked():
+            self.selected_languages.append('es')
+        
+        # 최소 하나의 언어는 선택되어야 함
+        if not self.selected_languages:
+            # 모든 언어가 해제되면 한국어를 다시 선택
+            self.korean_checkbox.setChecked(True)
+            self.selected_languages = ['ko']
+        
+        print(f"선택된 언어: {self.selected_languages}")
+    
+    def get_selected_languages(self):
+        """선택된 언어 목록 반환"""
+        return self.selected_languages
     
     def close_application(self):
         """애플리케이션 종료"""
