@@ -21,6 +21,7 @@ class ScreenTranslatorApp(QApplication):
         # 시그널 연결
         self.control_widget.capture_requested.connect(self.handle_capture_request)
         self.control_widget.toggle_interactive.connect(self.main_frame.set_interactive_state)
+        self.main_frame.deactivate_requested.connect(self.handle_deactivate_request)
         
         # 윈도우들 표시
         self.main_frame.show()
@@ -43,6 +44,17 @@ class ScreenTranslatorApp(QApplication):
         
         # 캡처 후에 컨트롤 위젯 다시 보이기
         self.control_widget.show()
+    
+    def handle_deactivate_request(self):
+        """비활성화 요청 처리"""
+        # 컨트롤 위젯의 상호작용 상태를 비활성화로 설정
+        self.control_widget.interactive_enabled = False
+        self.control_widget.toggle_button.setText("상호작용 활성화")
+        self.control_widget.status_label.setText("상태: 비활성화")
+        self.control_widget.show()  # 컨트롤 위젯 다시 보이기
+        
+        # 메인 프레임의 상호작용 상태 비활성화
+        self.main_frame.set_interactive_state(False)
     
     def cleanup_on_exit(self):
         """앱 종료 시 임시 파일들 정리"""

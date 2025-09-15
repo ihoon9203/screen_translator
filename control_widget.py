@@ -107,9 +107,11 @@ class ControlWidget(QMainWindow):
         self.toggle_interactive.emit(self.interactive_enabled)
         
         if self.interactive_enabled:
-            self.toggle_button.setText("상호작용 비활성화")
-            self.status_label.setText("상태: 활성화")
+            # 상호작용 활성화 시: 컨트롤 위젯 숨기기
+            self.hide()
         else:
+            # 상호작용 비활성화 시: 컨트롤 위젯 보이기
+            self.show()
             self.toggle_button.setText("상호작용 활성화")
             self.status_label.setText("상태: 비활성화")
     
