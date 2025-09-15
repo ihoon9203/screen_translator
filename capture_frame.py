@@ -149,8 +149,6 @@ class MainFrame(QMainWindow):
         
     def capture_screen(self):
         """빨간색 태두리 영역을 캡처하여 임시 JPG 파일로 저장"""
-        if not self.is_interactive:
-            return "상태가 비활성화되어 있습니다."
         
         try:
             # 현재 화면 가져오기
