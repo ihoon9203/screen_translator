@@ -4,6 +4,8 @@ from PyQt6.QtWidgets import QApplication
 from capture_frame import MainFrame
 from control_widget import ControlWidget
 from ocr_worker import OCRWorker
+from image_viewer import ImageViewer
+from translate_worker import TranslateWorker
 
 
 class ScreenTranslatorApp(QApplication):
@@ -81,11 +83,22 @@ class ScreenTranslatorApp(QApplication):
                 print("=== 추출된 텍스트 ===")
                 for text in extracted_texts:
                     print(text)
+                
+                # 이미지 뷰어 열기
+                self.open_image_viewer(image_path, result)
             else:
                 print("텍스트를 찾을 수 없습니다.")
                 
         except Exception as e:
             print(f"OCR 처리 중 오류 발생: {e}")
+    
+    def open_image_viewer(self, image_path, ocr_results):
+        """이미지 뷰어 창 열기"""
+        try:
+            self.image_viewer = ImageViewer(image_path, ocr_results)
+            self.image_viewer.show()
+        except Exception as e:
+            print(f"이미지 뷰어 열기 오류: {e}")
     
     def handle_deactivate_request(self):
         """비활성화 요청 처리"""
