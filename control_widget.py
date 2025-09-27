@@ -2,16 +2,17 @@
 
 
 
-from PyQt6.QtWidgets import QMainWindow, QWidget, QVBoxLayout, QPushButton, QLabel, QApplication, QCheckBox, QGroupBox
-from PyQt6.QtCore import Qt, pyqtSignal
+from PySide6.QtWidgets import QMainWindow, QWidget, QVBoxLayout, QPushButton, QLabel, QApplication, QCheckBox, QGroupBox
+from PySide6.QtCore import Qt, Signal
+from qt_material import apply_stylesheet
 
 
 class ControlWidget(QMainWindow):
     """2번 화면: 컨트롤 위젯 (캡처 버튼)"""
     
     # 시그널 정의
-    capture_requested = pyqtSignal(list)  # 언어 리스트를 함께 전달
-    toggle_interactive = pyqtSignal(bool)
+    capture_requested = Signal(list)  # 언어 리스트를 함께 전달
+    toggle_interactive = Signal(bool)
     
     def __init__(self):
         super().__init__()
@@ -29,34 +30,8 @@ class ControlWidget(QMainWindow):
         layout = QVBoxLayout(central_widget)
         layout.setContentsMargins(10, 10, 10, 10)
         
-        # 스타일 설정
-        self.setStyleSheet("""
-            QMainWindow {
-                background-color: #f0f0f0;
-                border: 2px solid #333;
-                border-radius: 10px;
-            }
-            QPushButton {
-                background-color: #4CAF50;
-                border: none;
-                color: white;
-                padding: 10px;
-                font-size: 14px;
-                font-weight: bold;
-                border-radius: 5px;
-            }
-            QPushButton:hover {
-                background-color: #45a049;
-            }
-            QPushButton:pressed {
-                background-color: #3d8b40;
-            }
-            QLabel {
-                font-size: 12px;
-                color: #333;
-                text-align: center;
-            }
-        """)
+        # qt_material 테마 적용
+        self.setStyleSheet(apply_stylesheet(QApplication.instance(), theme='dark_teal.xml'))
         
         # 캡처 버튼
         self.capture_button = QPushButton("캡처")
@@ -74,22 +49,6 @@ class ControlWidget(QMainWindow):
         
         # 언어 선택 그룹
         language_group = QGroupBox("언어 선택")
-        language_group.setStyleSheet("""
-            QGroupBox {
-                font-size: 12px;
-                font-weight: bold;
-                color: #333;
-                border: 1px solid #ccc;
-                border-radius: 5px;
-                margin-top: 10px;
-                padding-top: 10px;
-            }
-            QGroupBox::title {
-                subcontrol-origin: margin;
-                left: 10px;
-                padding: 0 5px 0 5px;
-            }
-        """)
         language_layout = QVBoxLayout(language_group)
         
         # 언어 체크박스들
@@ -110,34 +69,7 @@ class ControlWidget(QMainWindow):
         self.spanish_checkbox = QCheckBox("스페인어 (es)")
         self.spanish_checkbox.stateChanged.connect(self.on_language_changed)
         
-        # 체크박스 스타일 설정
-        checkbox_style = """
-            QCheckBox {
-                font-size: 11px;
-                color: #333;
-                spacing: 5px;
-            }
-            QCheckBox::indicator {
-                width: 16px;
-                height: 16px;
-            }
-            QCheckBox::indicator:unchecked {
-                border: 1px solid #ccc;
-                background-color: white;
-                border-radius: 3px;
-            }
-            QCheckBox::indicator:checked {
-                border: 1px solid #4CAF50;
-                background-color: #4CAF50;
-                border-radius: 3px;
-            }
-        """
-        
-        self.korean_checkbox.setStyleSheet(checkbox_style)
-        self.english_checkbox.setStyleSheet(checkbox_style)
-        self.japanese_checkbox.setStyleSheet(checkbox_style)
-        self.chinese_checkbox.setStyleSheet(checkbox_style)
-        self.spanish_checkbox.setStyleSheet(checkbox_style)
+        # 체크박스들은 qt_material 테마가 자동으로 스타일링
         
         language_layout.addWidget(self.korean_checkbox)
         language_layout.addWidget(self.english_checkbox)
@@ -149,23 +81,6 @@ class ControlWidget(QMainWindow):
         
         # 종료 버튼
         self.exit_button = QPushButton("종료")
-        self.exit_button.setStyleSheet("""
-            QPushButton {
-                background-color: #f44336;
-                border: none;
-                color: white;
-                padding: 10px;
-                font-size: 14px;
-                font-weight: bold;
-                border-radius: 5px;
-            }
-            QPushButton:hover {
-                background-color: #da190b;
-            }
-            QPushButton:pressed {
-                background-color: #c1170a;
-            }
-        """)
         self.exit_button.clicked.connect(self.close_application)
         layout.addWidget(self.exit_button)
         

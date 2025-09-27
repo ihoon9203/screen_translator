@@ -135,3 +135,4 @@ if __name__ == "__main__":
         # 지원 언어 확인
         languages = worker.get_supported_languages()
         print("지원 언어:", languages)
+

@@ -1,7 +1,7 @@
 
-from PyQt6.QtWidgets import QMainWindow, QWidget, QVBoxLayout, QLabel, QApplication, QPushButton
-from PyQt6.QtCore import Qt, pyqtSignal
-from PyQt6.QtGui import QPainter, QPen, QColor, QScreen
+from PySide6.QtWidgets import QMainWindow, QWidget, QVBoxLayout, QLabel, QApplication, QPushButton
+from PySide6.QtCore import Qt, Signal
+from PySide6.QtGui import QPainter, QPen, QColor, QScreen
 import tempfile
 import os
 from PIL import Image
@@ -11,14 +11,14 @@ class MainFrame(QMainWindow):
     """1번 화면: 빨간색 프레임, 투명 배경, 클릭 방지, 전체 화면"""
     
     # 시그널 정의
-    deactivate_requested = pyqtSignal()
+    deactivate_requested = Signal()
     
     def __init__(self):
         super().__init__()
         self.setWindowTitle("Main Frame")
         self.setWindowFlags(Qt.WindowType.FramelessWindowHint | Qt.WindowType.WindowStaysOnTopHint)
         self.setAttribute(Qt.WidgetAttribute.WA_TranslucentBackground)
-        
+        self.setStyleSheet("background-color: rgba(255, 255, 255, 0);")  # 반투명 흰색 배경
         # 전체 화면 설정
         self.showFullScreen()
         
@@ -117,8 +117,8 @@ class MainFrame(QMainWindow):
             # 상호작용 비활성화: 전체 화면으로 복원, 투명 배경 복원, 비활성화 버튼 숨김
             self.setWindowFlags(Qt.WindowType.FramelessWindowHint | Qt.WindowType.WindowStaysOnTopHint)
             # 투명 배경 복원
-            self.setAttribute(Qt.WidgetAttribute.WA_TranslucentBackground, True)  # 투명 배경 복원
-            self.setStyleSheet("")  # 스타일시트 초기화
+            self.setAttribute(Qt.WidgetAttribute.WA_TranslucentBackground)
+            self.setStyleSheet("background-color: rgba(255, 255, 255, 0);")  # 반투명 흰색 배경
             self.showFullScreen()
             self.deactivate_button.hide()  # 비활성화 버튼 숨김
         self.show()

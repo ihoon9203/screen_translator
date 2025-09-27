@@ -1,6 +1,7 @@
 import sys
 import atexit
-from PyQt6.QtWidgets import QApplication
+from PySide6.QtWidgets import QApplication
+from qt_material import apply_stylesheet
 from capture_frame import MainFrame
 from control_widget import ControlWidget
 from ocr_worker import OCRWorker
@@ -28,7 +29,6 @@ class ScreenTranslatorApp(QApplication):
         self.control_widget.capture_requested.connect(self.handle_capture_request)
         self.control_widget.toggle_interactive.connect(self.main_frame.set_interactive_state)
         self.main_frame.deactivate_requested.connect(self.handle_deactivate_request)
-        
         # 윈도우들 표시
         self.main_frame.show()
         self.control_widget.show()
