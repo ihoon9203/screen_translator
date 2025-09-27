@@ -23,7 +23,13 @@ class OCRWorker:
             image = vision.Image(content=content)
 
             # 텍스트 감지 수행
-            response = self.client.text_detection(image=image)
+            print(self.language_list)
+            response = self.client.text_detection(
+                image=image,
+                image_context=vision.ImageContext(
+                    language_hints=self.language_list
+                )
+            )
             texts = response.text_annotations
 
             if response.error.message:
