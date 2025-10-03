@@ -2,7 +2,7 @@
 
 
 
-from PySide6.QtWidgets import QMainWindow, QWidget, QVBoxLayout, QPushButton, QLabel, QApplication, QCheckBox, QGroupBox
+from PySide6.QtWidgets import QComboBox, QMainWindow, QWidget, QVBoxLayout, QPushButton, QLabel, QApplication, QCheckBox, QGroupBox
 from PySide6.QtCore import Qt, Signal
 from qt_material import apply_stylesheet
 
@@ -45,7 +45,17 @@ class ControlWidget(QMainWindow):
         
         # 상태 표시 레이블
         self.status_label = QLabel("상태: 비활성화")
-        layout.addWidget(self.status_label)
+        layout.addWidget(self.status_label) 
+
+        empty_widget = QWidget()
+        empty_widget.setFixedHeight(10)
+        layout.addWidget(empty_widget)
+
+        self.designated_language_dropdown = QComboBox()
+        self.designated_language_dropdown.setPlaceholderText("output language")
+        self.designated_language_dropdown.addItems(['한국어(ko)', 'English(en)', '日本語(ja)', '中文(ch_sim)', 'Español(es)'])
+        self.designated_language_dropdown.currentTextChanged.connect(self.on_language_changed)
+        layout.addWidget(self.designated_language_dropdown)
         
         # 언어 선택 그룹
         language_group = QGroupBox("언어 선택")

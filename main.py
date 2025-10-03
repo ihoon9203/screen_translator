@@ -56,7 +56,8 @@ class ScreenTranslatorApp(QApplication):
         # 캡처된 이미지와 언어 리스트를 OCR 처리에 전달
         if result and isinstance(result, dict) and result.get('success'):
             print(f"OCR 처리 시작: 이미지={result['temp_file_path']}, 언어={language_list}")
-            self.process_ocr(result['temp_file_path'], language_list)
+            ocr_objects = self.process_ocr(result['temp_file_path'], language_list)
+            translated_texts = self.process_translate(ocr_objects, language_list)
     
     def process_ocr(self, image_path, language_list):
         """OCR 처리"""
@@ -72,13 +73,13 @@ class ScreenTranslatorApp(QApplication):
             
             # 결과 출력
             print("=== OCR 결과 ===")
-            for i, (bbox, text, confidence) in enumerate(result):
-                print(f"{i+1}. 텍스트: '{text}' (신뢰도: {confidence:.2f})")
-                print(f"   위치: {bbox}")
+            for i, obj in enumerate(result):
+                print(f"{i+1}. 텍스트: '{obj.text}' (신뢰도: {obj.confidence:.2f})")
+                print(f"   위치: {obj.bbox}")
                 print()
             
             # 추출된 텍스트만 따로 출력
-            extracted_texts = [text for _, text, _ in result]
+            extracted_texts = [obj.text for obj in result]
             if extracted_texts:
                 print("=== 추출된 텍스트 ===")
                 for text in extracted_texts:
@@ -88,6 +89,7 @@ class ScreenTranslatorApp(QApplication):
                 self.open_image_viewer(image_path, result)
             else:
                 print("텍스트를 찾을 수 없습니다.")
+            return result
                 
         except Exception as e:
             print(f"OCR 처리 중 오류 발생: {e}")
@@ -99,6 +101,16 @@ class ScreenTranslatorApp(QApplication):
             self.image_viewer.show()
         except Exception as e:
             print(f"이미지 뷰어 열기 오류: {e}")
+    
+    def process_translate(self, ocr_objects):
+        """번역 처리"""
+        try:
+            self.translate_worker = TranslateWorker(self.api_key)
+            target_language = language_list[0]
+            translated_texts = self.translate_worker.translate_multiple(ocr_objects, language_list,)
+            return translated_texts
+        except Exception as e:
+            print(f"번역 처리 중 오류 발생: {e}")
     
     def handle_deactivate_request(self):
         """비활성화 요청 처리"""

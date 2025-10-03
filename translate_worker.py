@@ -2,7 +2,6 @@ import requests
 import json
 import os
 
-
 class TranslateWorker:
     """Google Cloud 번역 API를 사용하는 번역 워커"""
     
@@ -10,7 +9,7 @@ class TranslateWorker:
         self.api_key = api_key
         self.base_url = "https://translation.googleapis.com/language/translate/v2"
     
-    def translate_text(self, text, target_language='ko', source_language='auto'):
+    def translate_text(self, ocr_models, target_language, designated_language):
         """
         텍스트를 번역합니다.
         
@@ -73,22 +72,8 @@ class TranslateWorker:
                 'original_text': text
             }
     
-    def translate_multiple(self, texts, target_language='ko', source_language='auto'):
-        """
-        여러 텍스트를 한 번에 번역합니다.
-        
-        Args:
-            texts (list): 번역할 텍스트 리스트
-            target_language (str): 목표 언어
-            source_language (str): 원본 언어
-        
-        Returns:
-            list: 번역 결과 리스트
-        """
-        results = []
-        for text in texts:
-            result = self.translate_text(text, target_language, source_language)
-            results.append(result)
+    def translate_multiple(self, ocr_models, source_languages, designated_language='en'):
+        results = self.preprocess_text(self, ocr_models, source_languages, designated_language)
         return results
     
     def get_supported_languages(self):
