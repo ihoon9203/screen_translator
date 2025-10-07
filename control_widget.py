@@ -2,8 +2,9 @@
 
 
 
-from PySide6.QtWidgets import QComboBox, QMainWindow, QWidget, QVBoxLayout, QPushButton, QLabel, QApplication, QCheckBox, QGroupBox
-from PySide6.QtCore import Qt, Signal
+from PySide6.QtWidgets import QComboBox, QMainWindow, QWidget, QVBoxLayout, QPushButton, QLabel, QApplication, QCheckBox, QGroupBox, QHBoxLayout
+from PySide6.QtGui import QColor
+from PySide6.QtCore import Qt, Signal, QSettings
 from qt_material import apply_stylesheet
 
 
@@ -13,6 +14,7 @@ class ControlWidget(QMainWindow):
     # 시그널 정의
     capture_requested = Signal(list)  # 언어 리스트를 함께 전달
     toggle_interactive = Signal(bool)
+    color_mod_request = Signal(QColor)
     
     def __init__(self):
         super().__init__()
@@ -96,7 +98,48 @@ class ControlWidget(QMainWindow):
         
         # 내부 상태
         self.interactive_enabled = False
-        self.selected_languages = ['ko', 'en']  # 기본 선택된 언어
+        self.selected_languages = []
+        self.target_language = ""
+
+        self.colorPanel = SimpleColorPalette(self.color_mod_request, self) 
+        layout.addWidget(self.colorPanel)
+
+        # 모든 위젯 생성 후 이전 세션 값 로드
+        self.load_settings()
+    def _create_spacer(self, height):
+        """높이 지정된 빈 공간 생성"""
+        w = QWidget()
+        w.setFixedHeight(height)
+        return w
+    def on_color_selected(self):
+        print()
+    def save_settings(self):
+        """체크박스와 드롭다운 상태 저장"""
+        # 체크박스 상태
+        self.settings.setValue("lang/ko", self.korean_checkbox.isChecked())
+        self.settings.setValue("lang/en", self.english_checkbox.isChecked())
+        self.settings.setValue("lang/ja", self.japanese_checkbox.isChecked())
+        self.settings.setValue("lang/ch_sim", self.chinese_checkbox.isChecked())
+        self.settings.setValue("lang/es", self.spanish_checkbox.isChecked())
+        print(f"selected: {self.designated_language_dropdown.currentText()}")
+        # 드롭다운 상태 (현재 텍스트 기준)
+        self.settings.setValue("target_language", self.designated_language_dropdown.currentText())
+        target_lang = str(self.settings.value("target_language"))
+        print(f"target: {target_lang}")
+
+    def load_settings(self):
+        """체크박스와 드롭다운 상태 복원"""
+        print(f"korean: {self.settings.value("lang/ko", True, type=bool)}")
+        print(f"english: {self.settings.value("lang/en", True, type=bool)}")
+        print(f"japanese: {self.settings.value("lang/ja", True, type=bool)}")
+        print(f"chinese: {self.settings.value("lang/ch_sim", True, type=bool)}")
+        print(f"espanol: {self.settings.value("lang/es", True, type=bool)}")
+        print(f"target: {self.settings.value("target_language", type=str)}")
+        korean = self.settings.value("lang/ko", True, type=bool)
+        english = self.settings.value("lang/en", True, type=bool)
+        japanese = self.settings.value("lang/ja", True, type=bool)
+        chinese = self.settings.value("lang/ch_sim", True, type=bool)
+        espanol = self.settings.value("lang/es", True, type=bool)
         
     def on_capture_clicked(self):
         """캡처 버튼 클릭 처리"""
@@ -162,3 +205,40 @@ class ControlWidget(QMainWindow):
         if event.buttons() == Qt.MouseButton.LeftButton and hasattr(self, 'drag_position'):
             self.move(event.globalPosition().toPoint() - self.drag_position)
             event.accept()
+
+
+class SimpleColorPalette(QWidget,):
+    """빨강, 초록, 파랑, 투명색 선택 패널"""
+
+    def __init__(self, color_mod_request_signal, parent=None):
+        super().__init__(parent)
+
+        layout = QHBoxLayout(self)
+        layout.setContentsMargins(5, 5, 5, 5)
+        layout.setSpacing(10)
+
+        colors = {
+            "빨강": "#FF0000",
+            "초록": "#00FF00",
+            "파랑": "#0000FF",
+            "투명": "transparent"
+        }
+
+        for name, hex_color in colors.items():
+            btn = QPushButton()
+            btn.setFixedSize(40, 40)
+            btn.setToolTip(name)
+            btn.setStyleSheet(f"""
+                QPushButton {{
+                    background-color: {hex_color};
+                    border: 2px solid #888;
+                    border-radius: 8px;
+                }}
+                QPushButton:hover {{
+                    border: 2px solid #000;
+                }}
+            """)
+            # SimpleColorPalette 클래스 내부 (수정)
+# lambda를 사용하여 클릭 시점에 QColor 객체를 인수로 전달하며 color_selected 시그널을 방출
+            btn.clicked.connect(lambda _, c=hex_color: color_mod_request_signal.emit(QColor(c)))
+            layout.addWidget(btn)

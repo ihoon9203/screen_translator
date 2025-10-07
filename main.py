@@ -28,6 +28,7 @@ class ScreenTranslatorApp(QApplication):
         # 시그널 연결
         self.control_widget.capture_requested.connect(self.handle_capture_request)
         self.control_widget.toggle_interactive.connect(self.main_frame.set_interactive_state)
+        self.control_widget.color_mod_request.connect(self.main_frame.set_frame_color)
         self.main_frame.deactivate_requested.connect(self.handle_deactivate_request)
         # 윈도우들 표시
         self.main_frame.show()

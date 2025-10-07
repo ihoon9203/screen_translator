@@ -97,6 +97,9 @@ class MainFrame(QMainWindow):
             painter.fillRect(0, rect.height() - handle_size, handle_size, handle_size, handle_color)
             # 우하단
             painter.fillRect(rect.width() - handle_size, rect.height() - handle_size, handle_size, handle_size, handle_color)
+
+    def set_frame_color(self, QColor):
+        print(QColor)
         
     def set_interactive_state(self, interactive):
         """상호작용 상태 설정"""
