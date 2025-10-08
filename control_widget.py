@@ -47,12 +47,14 @@ class ControlWidget(QMainWindow):
         
         # 상태 표시 레이블
         self.status_label = QLabel("상태: 비활성화")
-        layout.addWidget(self.status_label) 
+        layout.addWidget(self.status_label)
+        layout.addWidget(self._create_spacer(10))
 
-        empty_widget = QWidget()
-        empty_widget.setFixedHeight(10)
-        layout.addWidget(empty_widget)
+        # 상태 레이블
+        self.status_label = QLabel("번역 언어")
+        layout.addWidget(self.status_label)
 
+        # 드롭다운 생성 (초기 선택 없음)
         self.designated_language_dropdown = QComboBox()
         self.designated_language_dropdown.setPlaceholderText("output language")
         self.designated_language_dropdown.addItems(['한국어(ko)', 'English(en)', '日本語(ja)', '中文(ch_sim)', 'Español(es)'])
@@ -100,7 +102,12 @@ class ControlWidget(QMainWindow):
         self.interactive_enabled = False
         self.selected_languages = []
         self.target_language = ""
+        layout.addWidget(self._create_spacer(10))
 
+        textbox = QLabel('색상 선택 패널')
+        layout.addWidget(textbox)
+
+        # 태두리 색상 선택 패널
         self.colorPanel = SimpleColorPalette(self.color_mod_request, self) 
         layout.addWidget(self.colorPanel)
 

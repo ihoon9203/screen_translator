@@ -29,6 +29,7 @@ class MainFrame(QMainWindow):
         # 레이아웃 설정
         layout = QVBoxLayout(central_widget)
         layout.setContentsMargins(0, 0, 0, 0)
+        self.frame_color = QColor(255, 0, 0)
         
         # 비활성화 버튼 (상단 중앙에 배치)
         self.deactivate_button = QPushButton("상호작용 비활성화")
@@ -77,8 +78,15 @@ class MainFrame(QMainWindow):
         painter = QPainter(self)
         painter.setRenderHint(QPainter.RenderHint.Antialiasing)
         
-        # 빨간색 프레임 그리기
-        pen = QPen(QColor(255, 0, 0), 3)
+        # 프레임 그리기
+        if self.is_interactive:
+            pen = QPen(QColor(255, 0, 0), 3)
+        else:
+            if self.frame_color is None:
+                pen = QPen(QColor(255, 0, 0), 3)
+            else:
+                pen = QPen(self.frame_color, 3)
+            
         painter.setPen(pen)
         painter.drawRect(self.rect().adjusted(1, 1, -1, -1))
         
@@ -99,7 +107,9 @@ class MainFrame(QMainWindow):
             painter.fillRect(rect.width() - handle_size, rect.height() - handle_size, handle_size, handle_size, handle_color)
 
     def set_frame_color(self, QColor):
+        self.frame_color = QColor
         print(QColor)
+        self.repaint()
         
     def set_interactive_state(self, interactive):
         """상호작용 상태 설정"""
